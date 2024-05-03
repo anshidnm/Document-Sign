@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body %}
+<div class="d-flex justify-content-center align-items-center" style="height: 700px;">
+    <div class="w-50 p-5 rounded rounded-3" style="background-color: rgb(239, 241, 243);">
+        <h4 class="text-center">Login To Your Account</h4>
+        <input id="error" type="hidden" value="{{error}}">
+        <form id="login_form" action="{% url "user:login" %}" method="POST">
+            {% csrf_token %}
+            <label for=""><b>Email</b></label>
+            <input id="email" name="email" placeholder="Enter your email" type="email" class="form-control">
+            <label class="mt-3" for=""><b>Password</b></label>
+            <input id="pw1" name="password" placeholder="Enter your password" type="password" class="form-control">
+            <div class="d-flex justify-content-center mt-3">
+            <div id="submit_but" style="cursor:pointer;" class="mt-2 rounded rounded-3 bg-primary text-light pt-3 pb-3 pl-5 pr-5"><b>Login</b></div>
+            </div>
+            <div class="d-flex justify-content-center mt-3">
+                <a href="{% url 'user:signup' %}">Create a new account</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock body %}
+{% block scripts %}
+<script src="{% static 'js/login.js' %}"></script>
+{% endblock %}

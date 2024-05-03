@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body %}
+<button onclick="toHome()" class="pb-2 rounded rounded-3 pt-2 pl-4 pr-4 bg-success text-light mt-2 ml-5"><b>Home</b></button>
+<div style="display: flex; justify-content: center; align-items: center; flex-direction: column;" class="mt-3">
+    <div style="cursor: pointer;" onclick="$('#select_file').click()" class="pl-5 pr-5 pt-3 pb-3 rounded rounded-3 bg-primary text-light"><b>Choose Document</b></div>
+    <p>Choose a PDF file to start</p>
+    <input style="display: none;" type="file" id="select_file" accept="application/pdf" onchange="convertPDFtoHTML(this.files[0])">
+    </div>
+    <div class="container row mt-5 gap-3" style="max-width: 100%;">
+        <div class="col-md-4">
+        <div id="page-form" style="display: none;">
+        <label for="" class="mt-3"><b>Page</b></label>
+        <input id="pagenum" placeholder="Enter Page Number To Manage Sign Area" type="number" class="form-control">
+        <div class="d-flex">
+        <button id="add_sign" class="bg-primary p-2 mt-3 text-light rounded rounded-3"><b>Manage Sign Area</b></button><br>
+        <button id="remove_sign" style="display: none;" class="bg-danger ml-2 p-2 mt-3 text-light rounded rounded-3"><b>Remove</b></button><br>
+        </div>
+    </div>
+        <div id="sliders" style="display: none;">
+        <label for="" class="mt-3">Vertical</label>
+        <input type="range" min="1" max="95" value="1" class="slider" id="verticalRange">
+        <label for="" class="mt-3">Horizontal</label>
+        <input type="range" min="1" max="95" value="2" class="slider" id="horizontalRange">
+        </div>
+        <div id="area_added" style="display: none;">
+        <label for="" class="mt-3"><b>Sign Area Added Pages</b></label>
+        <div id="added_pages" style="overflow-x: scroll;" class="d-flex"></div>
+        <div class="mt-3" data-toggle="modal" data-target="#exampleModal">
+            <button id="send" class="bg-success p-2 mt-3 text-light rounded rounded-3"><b>Send To Users</b></button><br>
+        </div>
+        </div>
+    </div>
+    <div class="col-md-8" style="overflow-y: scroll; height: 500px; max-width: 100%;">
+  <div id="htmlOutput" style="display: flex; flex-direction: column;"></div>
+</div>
+</div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Enter Users</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            {% csrf_token %}
+            <label for=""><b>Document Name</b></label>
+            <input id="doc_name" placeholder="Enter document name" type="text" class="form-control">  
+            <label class="mt-3" for=""><b>Email</b></label>
+          <input id="email" placeholder="Enter email of users" type="email" class="form-control">
+          <button id="add_reciever" class="bg-success text-ligh mt-3"><b>Add</b></button><br>
+          <label class="mt-3" for=""><b>Recievers</b></label>
+          <div id="recievers">
+
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="close_but" type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button id="send_doc" type="button" class="btn btn-primary">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock body %}
+{% block scripts %}
+<script src="{% static 'js/signArea.js' %}"></script>
+{% endblock scripts %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body %}
+<h4 class="text-center mt-5"><b>{{user.first_name}}</b></h4>
+<h4 class="text-center mt-1 text-primary"><b>{{user.email}}</b></h4>
+
+
+<div style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+    <form action="{% url 'user:logout' %}" method="post">
+        {% csrf_token %}
+        <input type="submit" class="bg-danger text-light" value="Logout">
+    </form>
+    <button onclick="toSignArea()" class="pb-2 rounded rounded-3 pt-2 pl-4 pr-4 bg-primary text-light mt-5"><b>Send Document</b></button>
+    <select id="doc_type" style="height: 50px;" class="w-25 mt-4 wide" name="doc_type" id="">
+        <option value="from">From Me</option>
+        <option value="to">To Me</option>
+    </select>
+    </select>
+    <table class="table table-striped w-75 mt-3">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th id="dynamic" scope="col">To</th>
+            <th scope="col">Name</th>
+            <th scope="col">Status</th>
+            <th scope="col">Action</th>
+          </tr>
+        </thead>
+        <tbody id="table_body">
+            {% include "table.html" %}
+        </tbody>
+      </table>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/index.js' %}"></script>
+{% endblock %}
