@@ -18,11 +18,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from sign.views import Homeview
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("sign/", include("sign.urls")),
-    path("user/", include("user.urls"))
+    path("user/", include("user.urls")),
+    path("", Homeview.as_view(), name="home_page")
 ]
 
 if settings.DEBUG:
