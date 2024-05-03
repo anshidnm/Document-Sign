@@ -31,6 +31,8 @@ Currently PDF format only supported for signing
 7. User can send documents to thers by "Send document" button from home page
 8. When click "Send document" button app will navigate to the page for manage signing area
 9. In this page user can choose pages for signature and area for signature. user can controll area horizontally and vertically
+10. To adjust the horizontal and vertical padding you need to enter the page number and
+must click "Manage Sign Area" Button
 10. After deciding the sign area user can send it to other users by entering their email
 11. When a user having that email signup and login in to this system he can show documents waiting his sign by using "To me" filter from home page
 12. When a user click "view" button from list then he can sign on that document if he is a reciever of that document

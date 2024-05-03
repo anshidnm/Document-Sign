@@ -6,6 +6,9 @@ from user.models import User
 
 
 class LoginView(View):
+    """
+    View for login
+    """
     def get(self, request, *args, **kwargs):
         return render(request, "login.html")
     
@@ -22,12 +25,20 @@ class LoginView(View):
 
 
 class LogoutView(View):
+    """
+    View for logout
+    """
+
     def post(self, request, *args, **kwargs):
         logout(request)
         return redirect("user:login")
 
 
 class SignUpView(View):
+    """
+    View for signup
+    """
+
     def get(self, request, *args, **kwargs):
         return render(request, "signup.html")
     
@@ -42,5 +53,6 @@ class SignUpView(View):
         user = User(email=email, first_name=name)
         user.set_password(password)
         user.save()
-        return redirect("user:login")
+        login(request, user)
+        return redirect("/sign/")
 

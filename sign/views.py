@@ -14,22 +14,23 @@ class Homeview(LoginRequiredMixin, View):
     """
     View for home page
     """
+
     login_url = "/user/login/"
 
     def get(self, request, *args, **kwargs):
         doc_type = request.GET.get("doc_type", "")
-        if doc_type and doc_type=="to":
+        if doc_type and doc_type=="from":
             docs = (
                 Document.objects
                 .select_related("from_user")
-                .filter(to_email=request.user.email)
+                .filter(from_user=request.user)
                 .order_by("-id")
             )
         else:
             docs = (
                 Document.objects
-                .filter(from_user=request.user)
                 .select_related("from_user")
+                .filter(to_email=request.user.email)
                 .order_by("-id")
             )
         context={"docs": docs}
@@ -75,6 +76,7 @@ class SignPutView(LoginRequiredMixin, View):
     """
     View for put and view signature
     """
+
     login_url = "/user/login/"
 
     def get(self, request, *args, **kwargs):
