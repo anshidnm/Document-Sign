@@ -5,6 +5,9 @@ const sign_data = JSON.parse(document.getElementById('sign_data').textContent);
 const is_signed = JSON.parse(document.getElementById('is_signed').textContent);
 const doc_id = JSON.parse(document.getElementById('doc_id').textContent);
 const file_url = JSON.parse(document.getElementById('file_url').textContent);
+const doc_name = JSON.parse(document.getElementById('document_name').textContent);
+const to_mail = JSON.parse(document.getElementById('to_mail').textContent);
+const user_mail = JSON.parse(document.getElementById('user_mail').textContent);
 
 var signedNumbers = {}
 
@@ -89,10 +92,10 @@ function convertPDFtoHTML(file) {
                     };
                     const renderTask = page.render(renderContext);
                     return renderTask.promise.then(function() {
-                        htmlContent += `<div><b>Page ${i} of ${numPages}</b></div>`
-                        htmlContent += `<div style="page-break-before: always;width: fit-content;">`;
+                        htmlContent += `<div class="page_nums"><b>Page ${i} of ${numPages}</b></div>`
+                        htmlContent += `<div style="width: fit-content;">`;
                         htmlContent += `<div id="con_${i}" class="page_container" data-page="${i}" style="position: relative; width: fit-content;">
-                            <img style="border: 2px solid black;display:block; height: auto;" src="${canvas.toDataURL('image/png')}">
+                            <img class="images" style="border: 2px solid black;display:block; height: auto;" src="${canvas.toDataURL('image/png')}">
                             </div>`
                         htmlContent += `</div>`;
                     });
@@ -113,24 +116,29 @@ var headers = {
 }
 
 $(document).on("click", ".signs", function(){
-    var color = $("#signature_colour").val()
-    if($("#sign_text").val().trim()){
+    if(user_mail == to_mail){
+        var color = $("#signature_colour").val()
         var sign = `<b style="color:${color};">${$("#sign_text").val()}</b>`
         var page_num = $(this).data("page")
         var sign_num = $(this).data("sign")
-        sign_data[page_num][sign_num] = {
-            "style": $(this).attr("style"),
-            "sign": sign
+        if(!signedNumbers[`${page_num}_${sign_num}`]){
+            if($("#sign_text").val().trim()){
+                sign_data[page_num][sign_num] = {
+                    "style": $(this).attr("style"),
+                    "sign": sign
+                }
+                signedNumbers[`${page_num}_${sign_num}`] = true
+                $(this).html(sign)
+                $(this).removeClass("bg-warning")
+                $(this).removeClass("border")
+                $(this).removeClass("border-2")
+                $(this).css({"opacity": "100%"})
+                
+            }else{
+                alertify.error("Please enter the signature")
+            }
         }
-        signedNumbers[`${page_num}_${sign_num}`] = true
-        $(this).html(sign)
-        $(this).removeClass("bg-warning")
-        $(this).removeClass("border")
-        $(this).removeClass("border-2")
-        $(this).css({"opacity": "100%"})
-        
-    }else{
-        alertify.error("Please enter the signature")
+
     }
 })
 
@@ -161,4 +169,30 @@ $(document).on("click", "#save_sign", function(){
             }
         }
     })
+})
+
+function removePdfClasses(){
+    $(".page_nums").hide()
+    var style="display:block; height: auto;"
+    $(".images").attr("style", style)
+}
+
+function showPdfClasses(){
+    $(".page_nums").show()
+    var style="border: 2px solid black;display:block; height: auto;"
+    $(".images").attr("style", style)
+}
+
+$(document).on("click", "#dwn_but", function(){
+    removePdfClasses()
+    var content = document.getElementById('htmlOutput');
+    var options = {
+        filename: `${doc_name}.pdf`,
+        image: { type: 'png', quality: 1 },
+        html2canvas: { scale: 1 },
+        jsPDF: { unit: 'in', format: [12.5, 9], orientation: 'portrait' }
+    };
+    
+    html2pdf().from(content).set(options).save();
+    setTimeout(showPdfClasses, 500)
 })

@@ -17,3 +17,7 @@ $(document).on("change", "#doc_type", function(){
 
     })
 })
+
+$(document).on("click", "#logout", function(){
+    $("#logout_form").submit()
+})
