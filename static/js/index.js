@@ -4,9 +4,9 @@ const toSignArea = ()=>{
 $(document).on("change", "#doc_type", function(){
     var doc_type = $(this).val()
     if(doc_type=="to"){
-        $("#dynamic").text("To")
-    }else{
         $("#dynamic").text("From")
+    }else{
+        $("#dynamic").text("To")
     }
     $.ajax({
         method:"GET",

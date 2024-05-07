@@ -25,7 +25,7 @@ function convertPDFtoHTML(file) {
             totalPage = numPages
             const promises = [];
             
-            for (let i = numPages; i >= 1; i--) {
+            for (let i = 1; i <= numPages; i++) {
                 const pagePromise = pdf.getPage(i).then(function(page) {
                     const scale = 1.5;
                     const viewport = page.getViewport({scale: scale});
@@ -180,15 +180,8 @@ $(document).on("click", ".page_container", function(e){
         </div>`
         $(this).append(signArea)    
         addSign(page, newSign)
-        pageData[newSign] = {
-            left: offsetX,
-            top: offsetY,
-            height: 50,
-            width: 160,
-            fontSize: 18,
-        }
+        pageData[newSign] = {style: $(`#sign_page_${page}_${newSign}`).attr("style")}
         signData[page] = pageData
-        console.log(signData)
     }else if(selectedArea && isClickable){
         $("#settings").hide()
         selectedArea = 0
@@ -206,6 +199,18 @@ function showSendArea(){
     }
 }
 
+function fetchLatestSignData(element){
+    var data = element.attr("style")
+    return data
+}
+
+$(document).on("mouseup", ".sign_area", function(){
+    const data = fetchLatestSignData($(this))
+    var page = $(this).data("page")
+    var sign = $(this).data("sign")
+    signData[page][sign].style = data
+})
+
 $(document).on("click mousedown", ".sign_area", function(){
     var page = $(this).data("page")
     var sign = $(this).data("sign")
@@ -216,7 +221,10 @@ $(document).on("click mousedown", ".sign_area", function(){
     $("#selection").text(`You have selected sign number ${sign} in page ${page}`)
     $(this).removeClass("bg-warning")
     $(this).addClass("bg-primary")
+    const data = fetchLatestSignData($(this))
+    signData[page][sign].style = data
 })
+
 
 $(document).on("click", "#remove_but", function(){
     var [page, sign] = selectedArea.split(":")

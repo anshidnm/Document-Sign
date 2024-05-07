@@ -1,11 +1,13 @@
 const toHome = ()=>{
     window.location.href = "/sign/"
 }
-var signedPages = []
-const page_data = JSON.parse(document.getElementById('page_data').textContent);
-const sign = JSON.parse(document.getElementById('sign').textContent);
+const sign_data = JSON.parse(document.getElementById('sign_data').textContent);
 const is_signed = JSON.parse(document.getElementById('is_signed').textContent);
 const doc_id = JSON.parse(document.getElementById('doc_id').textContent);
+const file_url = JSON.parse(document.getElementById('file_url').textContent);
+
+var signedNumbers = {}
+
 
 function fetchFileAsBlob(url) {
 return fetch(url)
@@ -18,8 +20,7 @@ return fetch(url)
 }
 
 $(document).ready(function(){
-    var url = $("#file_url").val()
-    fetchFileAsBlob(url)
+    fetchFileAsBlob(file_url)
     .then(blob => {
         convertPDFtoHTML(blob)
     })
@@ -28,21 +29,37 @@ $(document).ready(function(){
     });
 })
 
+
 function showSign(){
     
     if(is_signed){
-        for (const key in page_data) {
-            var style= `position: absolute; left:${page_data[key].left}%; top: ${page_data[key].top}%`
-            $(`#sign_page_${key}`).show()
-            $(`#sign_page_${key}`).attr("style", style)
-            $(`#sign_page_${key}`).html(`<b>${sign}</b>`)
-            document.getElementById(`sign_page_${key}`).className = ""
+        for (const page_num in sign_data) {
+            for(const sign_num in sign_data[page_num]){
+                const sign = sign_data[page_num][sign_num]
+                var signArea = `
+                    <div 
+                        id="sign_page_${page_num}_${sign_num}" class="text-center p-2 sign_area"
+                        style= "${sign.style}"
+                    >
+                    ${sign.sign}
+                    </div>`
+                $(`#con_${page_num}`).append(signArea)
+            }
         }
     }else{
-        for (const key in page_data) {
-            var style= `opacity: 85%; position: absolute; left:${page_data[key].left}%; top: ${page_data[key].top}%; cursor:pointer;`
-            $(`#sign_page_${key}`).attr("style", style)
-            $(`#sign_page_${key}`).show()
+        for (const page_num in sign_data) {
+            for(const sign_num in sign_data[page_num]){
+                const sign = sign_data[page_num][sign_num]
+                var signArea = `
+                    <div 
+                        id="sign_page_${page_num}_${sign_num}" data-page=${page_num} data-sign=${sign_num} class="text-center bg-warning text-dark border border-2 border-dark p-2 signs"
+                        style= "${sign.style}"
+                    >
+                    <b>#${sign_num} Sign Here</b>
+                    </div>`
+                $(`#con_${page_num}`).append(signArea)
+                signedNumbers[`${page_num}_${sign_num}`] = false
+            }
         }
     }
 }
@@ -58,7 +75,7 @@ function convertPDFtoHTML(file) {
             totalPage = numPages
             const promises = [];
             
-            for (let i = numPages; i >= 1; i--) {
+            for (let i = 1; i <= numPages; i++) {
                 const pagePromise = pdf.getPage(i).then(function(page) {
                     const scale = 1.5;
                     const viewport = page.getViewport({scale: scale});
@@ -74,11 +91,8 @@ function convertPDFtoHTML(file) {
                     return renderTask.promise.then(function() {
                         htmlContent += `<div><b>Page ${i} of ${numPages}</b></div>`
                         htmlContent += `<div style="page-break-before: always;width: fit-content;">`;
-                        htmlContent += `<div style="position: relative; width: fit-content;">
+                        htmlContent += `<div id="con_${i}" class="page_container" data-page="${i}" style="position: relative; width: fit-content;">
                             <img style="border: 2px solid black;display:block; height: auto;" src="${canvas.toDataURL('image/png')}">
-                            <div data-page="${i}" id="sign_page_${i}" class="signs bg-warning text-dark border border-2 border-dark p-2" style="display:none;">
-                            <b>Sign Here</b>
-                            </div>
                             </div>`
                         htmlContent += `</div>`;
                     });
@@ -94,48 +108,44 @@ function convertPDFtoHTML(file) {
     reader.readAsArrayBuffer(file);
 }
 
-$(document).on("keyup", "#sign_text", function(){
-    if($(this).val().trim()){
-    signedPages = [...new Set(signedPages)]
-    for(var i=0; i<signedPages.length; i++){
-        $(`#sign_page_${signedPages[i]}`).html(`<b>${$(this).val()}</b>`)
-    }
-}
-})
-
 var headers = {
     "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val()
 }
+
 $(document).on("click", ".signs", function(){
+    var color = $("#signature_colour").val()
     if($("#sign_text").val().trim()){
-        $(this).html(`<b>${$("#sign_text").val()}</b>`)
+        var sign = `<b style="color:${color};">${$("#sign_text").val()}</b>`
+        var page_num = $(this).data("page")
+        var sign_num = $(this).data("sign")
+        sign_data[page_num][sign_num] = {
+            "style": $(this).attr("style"),
+            "sign": sign
+        }
+        signedNumbers[`${page_num}_${sign_num}`] = true
+        $(this).html(sign)
         $(this).removeClass("bg-warning")
         $(this).removeClass("border")
         $(this).removeClass("border-2")
         $(this).css({"opacity": "100%"})
-        signedPages.push($(this).attr("data-page"))
+        
     }else{
         alertify.error("Please enter the signature")
     }
 })
 
 $(document).on("click", "#save_sign", function(){
-    signedPages = [...new Set(signedPages)]
-    if(!$("#sign_text").val().trim()){
-        alertify.error("Please enter a signature")
-        return false
-    }
-
-    if(signedPages.length != Object.keys(page_data).length){
-        alertify.error("Please put signature in all given area")
-        return false
-    }
-    data = {
-        sign:$("#sign_text").val(),
+    for(key in signedNumbers){
+        if(!signedNumbers[key]){
+            alertify.error("Please sign all sign areas.")
+            return false
+        }
     }
     $.ajax({
         headers:headers,
-        data:data,
+        data:{
+            "sign_data": JSON.stringify(sign_data),
+        },
         method:"POST",
         url:`/sign/view/${doc_id}/`,
         success: function(response){

@@ -1,7 +1,7 @@
 {% for doc in docs %}
 <tr>
   <th scope="row">{{forloop.counter}}</th>
-  <td>{{doc.to_email}}</td>
+  <td>{% if doc_type == 'to' %}{{doc.from_user.email}}{% else %}{{doc.to_email}}{% endif %}</td>
   <td>{{doc.name}}</td>
   <td>{% if doc.is_signed %}
       <div style="color:green;">Signed</div>

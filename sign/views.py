@@ -33,7 +33,7 @@ class Homeview(LoginRequiredMixin, View):
                 .filter(to_email=request.user.email)
                 .order_by("-id")
             )
-        context={"docs": docs}
+        context={"docs": docs, "doc_type": doc_type if doc_type else "to"}
         if doc_type:
             html = render_to_string("table.html", context, request)
             return JsonResponse({"template": html})
@@ -53,7 +53,7 @@ class SignAreaView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         try:
             file = request.FILES["file"]
-            sign_data = json.loads(request.POST["page_data"])
+            sign_data = json.loads(request.POST["sign_data"])
             recievers = json.loads(request.POST["recievers"])
             name = request.POST["doc_name"]
             data = [
@@ -61,7 +61,7 @@ class SignAreaView(LoginRequiredMixin, View):
                 from_user=request.user,
                 to_email=email,
                 file=file,
-                page_data=sign_data,
+                sign_data=sign_data,
                 name=name
             )
             for email in recievers
@@ -90,13 +90,14 @@ class SignPutView(LoginRequiredMixin, View):
     
     def post(self, request, *args, **kwargs):
         try:
-            sign = request.POST["sign"]
+            sign_data = json.loads(request.POST["sign_data"])
             pk = kwargs["id"]
             doc = Document.objects.get(pk=pk)
             doc.signed_at = datetime.now()
             doc.is_signed = True
-            doc.sign = sign
+            doc.sign_data = sign_data
             doc.save()
+
             return JsonResponse({"status": True})
         except Exception as e:
             return JsonResponse({"status": False})
