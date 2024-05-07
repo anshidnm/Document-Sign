@@ -66,6 +66,7 @@ function showSign(){
         }
     }
 }
+
 function convertPDFtoHTML(file) {
     const reader = new FileReader();
     reader.onload = function(event) {

@@ -1,4 +1,5 @@
 var error = $("#error").val()
+
 if(error.trim()){
     alertify.error(error)
     error = ""
