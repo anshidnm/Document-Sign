@@ -10,7 +10,7 @@ class Document(models.Model):
     to_email = models.EmailField(max_length=250)
     file = models.FileField()
     name = models.CharField(max_length=100)
-    page_data = models.JSONField(default=dict)
+    sign_data = models.JSONField(default=dict)
     is_signed = models.BooleanField(default=False)
     signed_at = models.DateTimeField(null=True, blank=True)
     sign = models.CharField(max_length=50, null=True, blank=True)

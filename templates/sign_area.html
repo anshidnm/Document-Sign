@@ -9,23 +9,23 @@
     </div>
     <div class="container row mt-5 gap-3" style="max-width: 100%;">
         <div class="col-md-4">
-        <div id="page-form" style="display: none;">
-        <label for="" class="mt-3"><b>Page</b></label>
-        <input id="pagenum" placeholder="Enter Page Number To Manage Sign Area" type="number" class="form-control">
-        <div class="d-flex">
-        <button id="add_sign" class="bg-primary p-2 mt-3 text-light rounded rounded-3"><b>Manage Sign Area</b></button><br>
-        <button id="remove_sign" style="display: none;" class="bg-danger ml-2 p-2 mt-3 text-light rounded rounded-3"><b>Remove</b></button><br>
+        <div id="instruction" style="display: none;">
+          <h4><u>Instructions</u></h4>
+          <b>1.</b>Please click the area where you want to add sign area.<br>
+          <b>2.</b>You can drag the sign area to where you want.<br>
+          <b>3.</b>You can also adjust the size of sign area.<br>
+          <b>4.</b>When select a sign area it will become blue colour. You can unselect by cliking outside of that sign area on the pdf page<br>
+          <b>5.</b>When you click on a specific sign area it will available to adjust font size and you can also remove it.<br>
         </div>
-    </div>
-        <div id="sliders" style="display: none;">
-        <label for="" class="mt-3">Vertical</label>
-        <input type="range" min="1" max="97" value="1" class="slider" id="verticalRange">
-        <label for="" class="mt-3">Horizontal</label>
-        <input type="range" min="1" max="97" value="2" class="slider" id="horizontalRange">
+        <div id="settings" style="display: none;">
+          <div id="sliders">
+            <label for="" class="mt-3"><b id="selection"></b></label><br>
+            <label for="" class="mt-3"><b>Font Size</b></label>
+            <input type="range" min="10" max="50" value="18" class="slider" id="fontSize">
+          </div>    
+          <button id="remove_but" class="bg-danger p-2 mt-3 text-light rounded rounded-3"><b>Remove</b></button><br>
         </div>
-        <div id="area_added" style="display: none;">
-        <label for="" class="mt-3"><b>Sign Area Added Pages</b></label>
-        <div id="added_pages" style="overflow-x: scroll;" class="d-flex"></div>
+        <div id="send_area" style="display: none;">
         <div class="mt-3" data-toggle="modal" data-target="#exampleModal">
             <button id="send" class="bg-success p-2 mt-3 text-light rounded rounded-3"><b>Send To Users</b></button><br>
         </div>
@@ -52,7 +52,7 @@
             <input id="doc_name" placeholder="Enter document name" type="text" class="form-control">  
             <label class="mt-3" for=""><b>Email</b></label>
           <input id="email" placeholder="Enter email of users" type="email" class="form-control">
-          <button id="add_reciever" class="bg-success text-ligh mt-3"><b>Add</b></button><br>
+          <button id="add_reciever" class="bg-success text-light rounded rounded-3 p-2 text-ligh mt-3"><b>Add</b></button><br>
           <label class="mt-3" for=""><b>Recievers</b></label>
           <div id="recievers">
 

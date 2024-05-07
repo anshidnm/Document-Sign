@@ -53,7 +53,7 @@ class SignAreaView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         try:
             file = request.FILES["file"]
-            page_data = json.loads(request.POST["page_data"])
+            sign_data = json.loads(request.POST["page_data"])
             recievers = json.loads(request.POST["recievers"])
             name = request.POST["doc_name"]
             data = [
@@ -61,7 +61,7 @@ class SignAreaView(LoginRequiredMixin, View):
                 from_user=request.user,
                 to_email=email,
                 file=file,
-                page_data=page_data,
+                page_data=sign_data,
                 name=name
             )
             for email in recievers

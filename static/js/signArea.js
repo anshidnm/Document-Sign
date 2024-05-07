@@ -2,24 +2,15 @@ const toHome = ()=>{
     window.location.href = "/sign/"
 }
 var totalPage=0
-var currentPage = 0
-var top_per = 1
-var left_per = 2
-var addedPages = []
-var page_data = {}
+var signData = {}
 var recievers = []
+var selectedArea = false
 
 function resetAll(){
-    currentPage = 0
-    top_per = 1
-    left_per = 2
-    addedPages = []
     recievers = []
-    page_data = {}
-    $("#sliders").hide()
-    $("#pagenum").val("")
-    $("#remove_sign").hide()
-    $("#area_added").hide()
+    $("#instruction").show()
+    $("#settings").hide()
+
 }
 
 function convertPDFtoHTML(file) {
@@ -50,11 +41,8 @@ function convertPDFtoHTML(file) {
                     return renderTask.promise.then(function() {
                         htmlContent += `<div><b>Page ${i} of ${numPages}</b></div>`
                         htmlContent += `<div style="page-break-before: always;width: fit-content;">`;
-                        htmlContent += `<div style="position: relative; width: fit-content;">
-                            <img style="border: 2px solid black;display:block; height: auto;" src="${canvas.toDataURL('image/png')}">
-                            <div id="sign_page_${i}"" class="bg-warning text-dark border border-2 border-dark p-2" style="display:none;">
-                            <b>Sign Here</b>
-                            </div>
+                        htmlContent += `<div id="con_${i}" class="page_container" data-page="${i}" style="position: relative; width: fit-content;">
+                            <img style="border: 2px solid black; display:block; height: auto;" src="${canvas.toDataURL('image/png')}" class="sign_click">
                             </div>`
                         htmlContent += `</div>`;
                     });
@@ -63,7 +51,6 @@ function convertPDFtoHTML(file) {
             }
             Promise.all(promises).then(function() {
                 document.getElementById('htmlOutput').innerHTML = htmlContent;
-                $("#page-form").show()
                 resetAll()
             });
         });
@@ -71,67 +58,16 @@ function convertPDFtoHTML(file) {
     reader.readAsArrayBuffer(file);
 }
 
-function moveSign(){
-    var style= `opacity: 85%; position: absolute; left:${left_per}%; top: ${top_per}%`
-    $(`#sign_page_${currentPage}`).attr("style", style)
-    page_data[currentPage] = {top:top_per, left: left_per}
+function addSign(page, signNum){
+    $(`#sign_page_${page}_${signNum}`).draggable({ containment: "parent" })
+    $(`#sign_page_${page}_${signNum}`).resizable({containment: `#con_${page}`})
 }
 
-function checkSignedArea(){
-    $("#added_pages").html("")
-    for(var i=0; i<addedPages.length; i++){
-        $("#added_pages").append(
-            `<div class="bg-primary pl-2 pr-2 pt-1 pb-1 text-light ml-1"><b>${addedPages[i]}</b></div>`
-        )
-    }
-}
 
-$(document).on("click", "#add_sign", function(){
-    var pageNum = $("#pagenum").val()
-    if(!pageNum.trim() || pageNum==0){
-        alertify.error("A valid page number is required")
-        $("#sliders").hide()
-        return false
-    }else if(pageNum>totalPage){
-        alertify.error(`This document has only ${totalPage} pages`)
-        $("#sliders").hide()
-        return false
-    }else{
-        $("#sliders").show()
-        currentPage = pageNum
-        addedPages.push(currentPage)
-        addedPages = [...new Set(addedPages)]
-        top_per = 1
-        left_per = 2
-        $("#verticalRange").val(top_per)
-        $("#horizontalRange").val(left_per)
-        moveSign()
-        $("#remove_sign").show()
-        checkSignedArea()
-        $("#area_added").show()
-    }
-})
-
-$(document).on("click", "#remove_sign", function(){
-    $(this).hide()
-    $("#pagenum").val("")
-    $("#sliders").hide()
-    $(`#sign_page_${currentPage}`).hide()
-    addedPages.splice(addedPages.indexOf(currentPage), 1)
-    if(addedPages.length == 0){
-        $("#area_added").hide()
-    }
-    checkSignedArea()
-    delete page_data[currentPage]
-})
-$(document).on("change", ".slider", function(){
-    var element = $(this)
-    if(element.attr("id")==="verticalRange"){
-        top_per = element.val()
-    }else{
-        left_per = element.val()
-    }
-    moveSign()
+$(document).on("change", "#fontSize", function(){
+    var fontSize = $(this).val()
+    var [page, sign] = selectedArea.split(":")
+    $(`#sign_page_${page}_${sign}`).css("font-size", `${fontSize}px`)
 })
 
 function checkRecievers(){
@@ -194,7 +130,7 @@ $(document).on("click", "#send_doc", function(){
     formData.append('file', fileInput.files[0])
     formData.append('doc_name', $("#doc_name").val())
     formData.append('recievers', JSON.stringify(recievers))
-    formData.append('page_data', JSON.stringify(page_data))
+    formData.append('sign_data', JSON.stringify(signData))
     $.ajax({
         headers:headers,
         data:formData,
@@ -217,4 +153,78 @@ $(document).on("click", "#send_doc", function(){
             alertify.error(error)
         }
     })
+})
+
+
+$(document).on("click", ".page_container", function(e){
+    var isClickable = e.target.className == "sign_click"
+    if(!selectedArea && isClickable){
+        $("#settings").hide()
+        var newSign = 1
+        var offsetX = e.offsetX
+        var offsetY = e.offsetY
+
+        const page = $(this).data("page")
+        var pageData = signData[page]
+        if(!pageData){
+            pageData = {}
+        }else{
+            newSign = Object.keys(pageData).length + 1
+        }
+        var signArea = `
+        <div 
+            id="sign_page_${page}_${newSign}" data-page="${page}" data-sign="${newSign}" class="text-center bg-warning text-dark border border-2 border-dark p-2 sign_area"
+            style= "cursor: pointer; opacity: 85%; position: absolute; left:${offsetX}px; top: ${offsetY}px; height: 50px; width: 160px; font-size:18px;"
+        >
+        <b>#${newSign} Sign Here</b>
+        </div>`
+        $(this).append(signArea)    
+        addSign(page, newSign)
+        pageData[newSign] = {
+            left: offsetX,
+            top: offsetY,
+            height: 50,
+            width: 160,
+            fontSize: 18,
+        }
+        signData[page] = pageData
+        console.log(signData)
+    }else if(selectedArea && isClickable){
+        $("#settings").hide()
+        selectedArea = 0
+        $(".sign_area").removeClass("bg-primary")
+        $(".sign_area").addClass("bg-warning")
+    }
+    showSendArea()
+})
+
+function showSendArea(){
+    if(Object.keys(signData).length){
+        $("#send_area").show()
+    }else{
+        $("#send_area").hide()
+    }
+}
+
+$(document).on("click mousedown", ".sign_area", function(){
+    var page = $(this).data("page")
+    var sign = $(this).data("sign")
+    $(".sign_area").removeClass("bg-primary")
+    $(".sign_area").addClass("bg-warning")
+    selectedArea = `${page}:${sign}`
+    $("#settings").show()
+    $("#selection").text(`You have selected sign number ${sign} in page ${page}`)
+    $(this).removeClass("bg-warning")
+    $(this).addClass("bg-primary")
+})
+
+$(document).on("click", "#remove_but", function(){
+    var [page, sign] = selectedArea.split(":")
+    delete signData[page][sign]
+    if(!Object.keys(signData[page]).length){
+        delete signData[page]
+    }
+    $(`#sign_page_${page}_${sign}`).remove()
+    $("#settings").hide()
+    showSendArea()
 })
