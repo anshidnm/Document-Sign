@@ -190,7 +190,7 @@ $(document).on("click", "#dwn_but", function(){
         filename: `${doc_name}.pdf`,
         image: { type: 'png', quality: 1 },
         html2canvas: { scale: 1 },
-        jsPDF: { unit: 'in', format: [12.5, 9], orientation: 'portrait' }
+        jsPDF: { unit: 'in', format: [12.5, 9.5], orientation: 'portrait' }
     };
     
     html2pdf().from(content).set(options).save();
