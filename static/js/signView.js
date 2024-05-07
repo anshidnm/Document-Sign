@@ -137,7 +137,9 @@ $(document).on("click", ".signs", function(){
 $(document).on("click", "#save_sign", function(){
     for(key in signedNumbers){
         if(!signedNumbers[key]){
-            alertify.error("Please sign all sign areas.")
+            var [page, sign] = key.split("_")
+            alertify.error("Please sign all sign areas")
+            alertify.warning(`sign number ${sign} in page ${page} not signed yet!`)
             return false
         }
     }

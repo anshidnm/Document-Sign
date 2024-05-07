@@ -13,14 +13,17 @@ class LoginView(View):
         return render(request, "login.html")
     
     def post(self, request, *args, **kwargs):
-        context = {"error": ""}
+        context = {}
         email = request.POST.get("email")
         password = request.POST.get("password")
         user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
             return redirect("/sign/")
-        context["error"] = "Invalid credentials"
+        if not User.objects.filter(email=email).exists():
+            context["error"] = "User not found"
+        else:
+            context["error"] = "Invalid credentials"
         return render(request, "login.html", context=context)
 
 
